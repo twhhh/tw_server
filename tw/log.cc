@@ -3,9 +3,44 @@
 #include <functional>
 #include "log.h"
 namespace tw{
+const char* LogLevel::LevelToString(Level level){
+switch(level){
+#define XX(name)\
+    case(name): \
+    return #name;\
+    break;
+    XX(DEBUG);
+    XX(INFO);
+    XX(WARN);
+    XX(ERROR);
+    XX(FATAL);
+#undef XX
+    default:
+        return "UNKNOW";
+}
+}
+LogLevel::Level LogLevel::StringToLevel(const std::string& str){
+#define XX(level, v)\
+    if(str == #v){\
+        return LogLevel::level;\
+    }
+    XX(DEBUG, debug);
+    XX(INFO, info);
+    XX(WARN, warn);
+    XX(ERROR, error);
+    XX(FATAL, fatal);
+
+    XX(DEBUG, DEBUG);
+    XX(INFO, INFO);
+    XX(WARN, WARN);
+    XX(ERROR, ERROR);
+    XX(FATAL, FATAL);
+#undef XX
+    return LogLevel::DEBUG;
+}
 LogEvent::LogEvent(const char* file, uint32_t line, uint32_t elapse
             ,uint32_t threadID, uint32_t fiberID, uint64_t time
-            ,std::string threadName, LogLevel::Level level, Logger::ptr logger)
+            ,std::string threadName, LogLevel::Level level, std::shared_ptr<Logger> logger)
             :m_file(file)
             ,m_line(line)
             ,m_elapse(elapse)
@@ -30,46 +65,53 @@ void LogEvent::format(const char* fmt, va_list va){
     }
 }
 
+LogEventWrap::LogEventWrap(LogEvent::ptr event){
+    m_event = event;
+}
+LogEventWrap::~LogEventWrap(){
+    m_event->getLogger()->log(m_event);
+}
+
 class MsgFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         os << event->getContent();
     }
     
 };
 class FileFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         os << event->getFile();
     }
 };
 class LineFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         os << event->getLine();
     }   
 };
 class ElapseFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         os << event->getElapse();
     }
 };
 class ThreadIDFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         os << event->getThreadID();
     }
 };
 class FiberIDFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         os << event->getFiberID();
     }
 };
 class TimeFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         struct tm tm;
         std::string fo = "%Y-%m-%d %H:%M:%S";
         time_t time = event->getTime();
@@ -81,31 +123,31 @@ public:
 };
 class ThreadNameFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         os << "\"" << event->getThreadName() << "\"";
     }
 };
 class LevelFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
-        os << "[ "<< LogLevel::LevelToString(event->getLevel()) << " ]";
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
+        os << "["<< LogLevel::LevelToString(event->getLevel()) << "]";
     }
 };
 class TabFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         os << "\t";
     }
 };
 class EnterFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         os << std::endl;
     }
 };
 class NameFormatterItem : public LogFormatter::FormatterItem{
 public:
-    void format(std::ostream& os, Logger::ptr logger, LogEvent::ptr event)override{
+    void format(std::ostream& os, std::shared_ptr<Logger> logger, LogEvent::ptr event)override{
         os << logger->getName();
     }
 };
@@ -131,7 +173,7 @@ void LogFormatter::init(){
 #undef XX
     };
     std::vector<std::string> vec;
-    for(int i = 0; i < m_pattern.size(); ++i){
+    for(int i = 0; (size_t)i < m_pattern.size(); ++i){
         if(m_pattern[i] == '%'){
             continue;
         }
@@ -148,7 +190,7 @@ void LogFormatter::init(){
         }
     }
 }
-std::string LogFormatter::format(Logger::ptr logger, LogEvent::ptr event){
+std::string LogFormatter::format(std::shared_ptr<Logger> logger, LogEvent::ptr event){
     std::stringstream ss;
     if(!m_error){
         for(auto& i : m_items){
@@ -157,8 +199,76 @@ std::string LogFormatter::format(Logger::ptr logger, LogEvent::ptr event){
     }
     return ss.str();
 }
-
-void StdoutLogAppender::log(Logger::ptr logger, LogEvent::ptr event){
+void StdoutLogAppender::log(std::shared_ptr<Logger> logger, LogEvent::ptr event){
+    MutexType::Lock lock(m_mutex);
     std::cout << m_formatter->format(logger, event);
+}
+Logger::Logger(LogLevel::Level level, const std::string& name)
+    :m_level(level)
+    ,m_name(name){
+        //addAppender(LogAppender::ptr(new StdoutLogAppender()));
+    }
+void Logger::addAppender(LogAppender::ptr appender){
+    MutexType::Lock lock(m_mutex);
+    for(auto& it : m_appenders){
+        if(it == appender){
+            return;
+        }
+    }
+    m_appenders.push_back(appender);
+}
+void Logger::delAppender(LogAppender::ptr appender){
+    MutexType::Lock lock(m_mutex);
+    auto it = m_appenders.begin();
+    for(; it != m_appenders.end(); ++it){
+        if(*it == appender){
+            m_appenders.erase(it);
+            break;
+        }
+    }
+}
+
+void Logger::setFormatter(LogFormatter::ptr formatter){
+    MutexType::Lock lock(m_mutex);
+    for(auto& it : m_appenders){
+        it->setLogFormatter(formatter);
+    }
+}
+void Logger::setFormatterDefault(){
+    MutexType::Lock lock(m_mutex);
+    for(auto& it : m_appenders){
+        it->setLogFormatter(LogFormatter::ptr(new LogFormatter("%d%T%t%N%T%F%T%p%c%T%f%l%T%m%n")));
+    }
+}
+
+void Logger::log(LogEvent::ptr event){
+    if(m_appenders.empty()){
+        return;
+    }
+    for(int i = 0; (size_t)i < m_appenders.size(); ++i){
+        if(!m_appenders[i]->hasFormat()){
+            m_appenders[i]->setLogFormatter(LogFormatter::ptr(new LogFormatter("%d%T%t%N%T%F%T%p%c%T%f%l%T%m%n")));
+        }
+        m_appenders[i]->log(shared_from_this(), event);
+    }
+}
+
+LoggerManager::LoggerManager(){
+    m_root.reset(new Logger(LogLevel::DEBUG, "root"));
+    m_root->addAppender(LogAppender::ptr(new StdoutLogAppender()));
+    m_root->setFormatter(LogFormatter::ptr(new LogFormatter("%d%T%t%N%T%F%T%p%c%T%f%l%T%m%n")));
+    m_map[m_root->getName()] = m_root;
+}
+
+Logger::ptr LoggerManager::getLogger(const std::string& name){
+    MutexType::Lock lock(m_mutex);
+    auto it = m_map.find(name);
+    if(it != m_map.end()){
+        return it->second;
+    }
+    Logger::ptr logger(new Logger(LogLevel::DEBUG, name));
+    logger->addAppender(LogAppender::ptr(new StdoutLogAppender()));
+    m_map[logger->getName()] = logger;
+    return logger;
 }
 }
