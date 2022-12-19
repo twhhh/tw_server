@@ -2,10 +2,11 @@
 #include "log.h"
 #include <execinfo.h>
 #include <vector>
+#include "fiber.h"
 namespace tw{
 static Logger::ptr m_logger = TW_LOG_NAME("system");
 uint32_t GetFiberID(){
-    return 0;
+    return Fiber::GetFiberID();
 }
 pid_t GetThreadID(){
     return syscall(SYS_gettid);

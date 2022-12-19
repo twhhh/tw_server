@@ -18,6 +18,8 @@ set(SRC
 tw/log.cc 
 tw/util.cc
 tw/thread.cc
+tw/fiber.cc
+tw/scheduler.cc
 )
 
 
@@ -26,3 +28,6 @@ target_link_libraries(test ${LIBS})#-l
 
 add_executable(test_thread ${SRC} test_thread.cc)
 target_link_libraries(test_thread ${LIBS})
+
+add_executable(test_scheduler ${SRC} test_scheduler.cc)
+target_link_libraries(test_scheduler ${LIBS})

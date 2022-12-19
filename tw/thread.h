@@ -24,6 +24,7 @@ public:
     Thread(std::function<void()> cb, const std::string& name);
     ~Thread();
     const std::string& getName() const {return m_name;}
+    pid_t getID() const {return m_id;}
     void join();
     static Thread* GetThis();
     static const std::string& GetName();
@@ -31,6 +32,7 @@ public:
 private:
     static void* run(void* arg);
 private:
+    pid_t m_id = -1;
     pthread_t m_thread;
     std::function<void()> m_cb;
     std::string m_name;

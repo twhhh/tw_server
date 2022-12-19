@@ -6,7 +6,8 @@ using MutexType = tw::Mutex;
 tw::Logger::ptr m_logger = TW_LOG_ROOT();
 void print(int i){
     MutexType::Lock lock(m_mutex);
-    TW_LOG_INFO(m_logger) << "XXXXXXXXXX";
+    TW_LOG_INFO(m_logger) << "XXXXXXXXXX" << tw::Thread::GetName();
+
     sleep(1);
 }
 
