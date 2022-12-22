@@ -97,9 +97,9 @@ private:
 
 template<class T>
 class WriteScopedLockImpl{
-    public:
-    WriteScopedLockImpl(T& mutex){
-        m_mutex = mutex;
+public:
+    WriteScopedLockImpl(T& mutex)
+        :m_mutex(mutex){
         m_mutex.wrlock();
         m_locked = true;
     }
@@ -169,7 +169,7 @@ public:
     void unlock(){}
 };
 class RWMutex : Noncopyable{
-private:
+public:
     using ReadLock = ReadScopedLockImpl<RWMutex>;
     using WriteLock = WriteScopedLockImpl<RWMutex>;
     RWMutex(){
@@ -192,7 +192,7 @@ private:
 };
 
 class NullRWMutex : Noncopyable{
-private:
+public:
     using ReadLock = ReadScopedLockImpl<NullRWMutex>;
     using WriteLock = WriteScopedLockImpl<NullRWMutex>;
     NullRWMutex(){}

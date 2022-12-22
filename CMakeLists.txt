@@ -20,6 +20,8 @@ tw/util.cc
 tw/thread.cc
 tw/fiber.cc
 tw/scheduler.cc
+tw/iomanager.cc
+tw/timer.cc
 )
 
 
@@ -31,3 +33,6 @@ target_link_libraries(test_thread ${LIBS})
 
 add_executable(test_scheduler ${SRC} test_scheduler.cc)
 target_link_libraries(test_scheduler ${LIBS})
+
+add_executable(test_iomanager ${SRC} test_iomanager.cc)
+target_link_libraries(test_iomanager ${LIBS})

@@ -2,6 +2,7 @@
 #include "log.h"
 #include <execinfo.h>
 #include <vector>
+#include <sys/time.h>
 #include "fiber.h"
 namespace tw{
 static Logger::ptr m_logger = TW_LOG_NAME("system");
@@ -31,5 +32,10 @@ std::string BackTraceToString(){
         ss << rt[i] << std::endl;
     }
     return ss.str();
+}
+uint64_t GetCurrentMS(){
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return tv.tv_sec * 1000ul + tv.tv_usec / 1000;
 }
 }

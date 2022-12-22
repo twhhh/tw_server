@@ -51,6 +51,7 @@ void Scheduler::stop(){
     m_stopping = true;
     if(m_mainThread){
         if(!stopping()){
+            TW_LOG_ERROR(m_logger) << "come here";
             m_scheduleFiber->call();
         }
     }//start caller scheduler

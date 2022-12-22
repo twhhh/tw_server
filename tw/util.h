@@ -7,4 +7,5 @@ uint32_t GetFiberID();
 pid_t GetThreadID();
 
 std::string BackTraceToString();
+uint64_t GetCurrentMS();
 }

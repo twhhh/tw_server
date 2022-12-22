@@ -16,6 +16,7 @@ public:
     Scheduler(const std::string& name = "", size_t threadCount = 1, bool use_caller = true);
     void start();
     void stop();
+    bool hasIdleThread() const {return a_idleThreadCount > 0;}
     static Fiber* GetSchedulerFiber();
     static Scheduler* GetThis();
     template<class FiberOrFunc>
@@ -58,7 +59,7 @@ protected:
     virtual void idle();
     void run();
     void setThis();
-    bool stopping();
+    virtual bool stopping();
 private:
     struct FiberAndFunc{
         Fiber::ptr fiber = nullptr;
