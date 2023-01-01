@@ -13,6 +13,7 @@ link_directories(/apps/sylar/lib)#-I
 
 set(LIBS
         pthread
+        dl
         )
 set(SRC 
 tw/log.cc 
@@ -22,6 +23,8 @@ tw/fiber.cc
 tw/scheduler.cc
 tw/iomanager.cc
 tw/timer.cc
+tw/fd_manager.cc
+tw/hook.cc
 )
 
 
@@ -36,3 +39,6 @@ target_link_libraries(test_scheduler ${LIBS})
 
 add_executable(test_iomanager ${SRC} test_iomanager.cc)
 target_link_libraries(test_iomanager ${LIBS})
+
+add_executable(test_hook ${SRC} test_hook.cc)
+target_link_libraries(test_hook ${LIBS})

@@ -1,6 +1,7 @@
 #include "scheduler.h"
 #include "log.h"
 #include "macro.h"
+#include "hook.h"
 
 namespace tw{
 static Logger::ptr m_logger = TW_LOG_NAME("system");
@@ -51,7 +52,6 @@ void Scheduler::stop(){
     m_stopping = true;
     if(m_mainThread){
         if(!stopping()){
-            TW_LOG_ERROR(m_logger) << "come here";
             m_scheduleFiber->call();
         }
     }//start caller scheduler
@@ -67,6 +67,7 @@ void Scheduler::stop(){
 
 void Scheduler::run(){
     TW_LOG_INFO(m_logger) << "run ";
+    set_hook_enable(true);
     setThis();
     if(GetThreadID() != m_mainThread){
         t_scheduler_fiber = Fiber::GetThis().get();
@@ -120,6 +121,9 @@ void Scheduler::run(){
                schedule(event);
             }else if(event->getState() == Fiber::TERM ||
                         event->getState() == Fiber::EXECEPT){
+                event.reset();
+            }else{
+                event->m_state = Fiber::HOLD;
                 event.reset();
             }
         }else {//finish a task

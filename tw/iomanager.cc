@@ -24,6 +24,7 @@ void IOManager::FdContext::resetContext(EventContext& ctx){
 }
 
 void IOManager::FdContext::triggerEvent(Event ev){
+    TW_LOG_DEBUG(m_logger) << "trigger";
     TW_ASSERT(ev & events)
     events = (Event)(events & ~ev);
     EventContext& ctx = getContext(ev);
@@ -101,7 +102,6 @@ int IOManager::addEvent(int fd, Event ev, std::function<void()> cb){
     memset(&ep_event, 0, sizeof(epoll_event));
     ep_event.events = EPOLLET | fd_ctx->events;
     ep_event.data.ptr = fd_ctx;
-    TW_LOG_DEBUG(m_logger) << "debug";
     int rt = epoll_ctl(m_epfd, op, fd, &ep_event);
     if(rt){
         TW_LOG_ERROR(m_logger) << "epoll_ctl error fd = "
@@ -119,7 +119,6 @@ int IOManager::addEvent(int fd, Event ev, std::function<void()> cb){
         TW_ASSERT2(ctx.fiber->getState() == Fiber::EXEC
         , "state = " << ctx.fiber->getState());
     }
-       TW_LOG_DEBUG(m_logger) << "addevent quit";
     return 0;
 }
 bool IOManager::delEvent(int fd, Event ev){
@@ -254,16 +253,21 @@ void IOManager::idle(){
             FdContext::MutexType::Lock lock(fd_ctx->mutex);
             if(event.events & (EPOLLERR | EPOLLHUP)){
                 if(fd_ctx->events & Event::READ){
+                    lock.unlock();
                     delEvent(fd_ctx->fd, Event::READ);
                 }
                 if(fd_ctx->events & Event::WRITE){
+                    lock.unlock();
                     delEvent(fd_ctx->fd, Event::WRITE);
                 }
+                lock.lock();
             }
             if(fd_ctx->events & Event::READ){
+                lock.unlock();
                 cancelEvent(fd_ctx->fd, Event::READ);
             }
             if(fd_ctx->events & Event::WRITE){
+                lock.unlock();
                 cancelEvent(fd_ctx->fd, Event::WRITE);
             }
         }
@@ -274,7 +278,6 @@ void IOManager::idle(){
     }
 }
 bool IOManager::stopping(){
-    TW_LOG_DEBUG(m_logger) << "iomanager stopping";
     uint64_t timeout = 0;
     return stopping(timeout);
 }
