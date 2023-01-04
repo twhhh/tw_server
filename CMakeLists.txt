@@ -3,7 +3,7 @@ project(test)
 
 
 set(CMAKE_VERBOSE_MAKEFILE ON)
-set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O0 -ggdb -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
+set(CMAKE_CXX_FLAGS "$ENV{CXXFLAGS} -rdynamic -O3 -ggdb -std=c++11 -Wall -Wno-deprecated -Werror -Wno-unused-function -Wno-builtin-macro-redefined")
 
 include_directories(tw)
 include_directories(/apps/sylar/include)#-L
@@ -25,6 +25,7 @@ tw/iomanager.cc
 tw/timer.cc
 tw/fd_manager.cc
 tw/hook.cc
+tw/address.cc
 )
 
 
@@ -42,3 +43,6 @@ target_link_libraries(test_iomanager ${LIBS})
 
 add_executable(test_hook ${SRC} test_hook.cc)
 target_link_libraries(test_hook ${LIBS})
+
+add_executable(test_address ${SRC} test_address.cc)
+target_link_libraries(test_address ${LIBS})
