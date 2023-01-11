@@ -19,7 +19,7 @@ void test(){
         vecs.push_back(thr);
     }
     sleep(5);
-    for(size_t i; i < vecs.size(); ++i){
+    for(size_t i = 0; i < vecs.size(); ++i){
         vecs[i]->join();
     }
     TW_LOG_INFO(m_logger) << "end";

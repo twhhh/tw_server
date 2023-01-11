@@ -435,4 +435,7 @@ std::ostream& UnknownAddress::insert(std::ostream& os) const{
     os << "[UnknownAddress family= " << m_addr.sa_family << "]";
     return os;
 }
+std::ostream& operator<<(std::ostream& os, const Address& addr){
+    return addr.insert(os);
+}
 }

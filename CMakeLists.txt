@@ -26,6 +26,8 @@ tw/timer.cc
 tw/fd_manager.cc
 tw/hook.cc
 tw/address.cc
+tw/socket.cc
+tw/bytearray.cc
 )
 
 
@@ -46,3 +48,9 @@ target_link_libraries(test_hook ${LIBS})
 
 add_executable(test_address ${SRC} test_address.cc)
 target_link_libraries(test_address ${LIBS})
+
+add_executable(test_socket ${SRC} test_socket.cc)
+target_link_libraries(test_socket ${LIBS})
+
+add_executable(test_bytearray ${SRC} test_bytearray.cc)
+target_link_libraries(test_bytearray ${LIBS})
