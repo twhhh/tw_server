@@ -105,9 +105,13 @@ void Scheduler::run(){
                 && ff.fiber->getState() != Fiber::EXECEPT){
             ff.fiber->swapIn();
             --a_activeThreadCount;
-            if(ff.fiber->getState() == Fiber::HOLD){
-               schedule(ff.fiber);
-            }            
+            if(ff.fiber->getState() == Fiber::READY) {
+                schedule(ff.fiber);
+            } else if(ff.fiber->getState() != Fiber::TERM
+                    && ff.fiber->getState() != Fiber::EXECEPT) {
+                ff.fiber->m_state = Fiber::HOLD;
+            }
+            ff.reset();   
         } else if(ff.cb){
             if(event){
                 event->reset(ff.cb);
@@ -117,9 +121,10 @@ void Scheduler::run(){
             ff.reset();
             event->swapIn();
             --a_activeThreadCount;
-            if(event->getState() == Fiber::HOLD){
-               schedule(event);
-            }else if(event->getState() == Fiber::TERM ||
+            // if(event->getState() == Fiber::HOLD){
+            //    schedule(event);
+            // }else 
+            if(event->getState() == Fiber::TERM ||
                         event->getState() == Fiber::EXECEPT){
                 event.reset();
             }else{

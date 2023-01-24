@@ -109,6 +109,7 @@ retry:
             return -1;
         }else{
             tw::Fiber::YieldToHold();
+            tw::Fiber::GetThis()->setState(tw::Fiber::EXEC);
             if(timer){
                 timer->cancel();
             }

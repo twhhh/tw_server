@@ -24,14 +24,14 @@ void IOManager::FdContext::resetContext(EventContext& ctx){
 }
 
 void IOManager::FdContext::triggerEvent(Event ev){
-    TW_LOG_DEBUG(m_logger) << "trigger";
+    //TW_LOG_DEBUG(m_logger) << "trigger";
     TW_ASSERT(ev & events)
     events = (Event)(events & ~ev);
     EventContext& ctx = getContext(ev);
     if(ctx.fiber){
-        ctx.scheduler->schedule(ctx.fiber);
+        ctx.scheduler->schedule(&ctx.fiber);
     }else{
-        ctx.scheduler->schedule(ctx.cb);
+        ctx.scheduler->schedule(&ctx.cb);
     }
     ctx.scheduler = nullptr;
     return;
@@ -96,11 +96,10 @@ int IOManager::addEvent(int fd, Event ev, std::function<void()> cb){
             << " fd_ctx->events = " << fd_ctx->events;
         TW_ASSERT(false);
     }
-    fd_ctx->events = (Event)(fd_ctx->events | ev); 
-    int op = (fd_ctx->events & ~ev) ? EPOLL_CTL_MOD : EPOLL_CTL_ADD;
+    int op = fd_ctx->events ? EPOLL_CTL_MOD : EPOLL_CTL_ADD;
     epoll_event ep_event;
     memset(&ep_event, 0, sizeof(epoll_event));
-    ep_event.events = EPOLLET | fd_ctx->events;
+    ep_event.events = EPOLLET | fd_ctx->events | ev;
     ep_event.data.ptr = fd_ctx;
     int rt = epoll_ctl(m_epfd, op, fd, &ep_event);
     if(rt){
@@ -110,6 +109,7 @@ int IOManager::addEvent(int fd, Event ev, std::function<void()> cb){
         return -1;
     }
     ++a_pendingEventCount;
+    fd_ctx->events = (Event)(fd_ctx->events | ev);
     FdContext::EventContext& ctx = fd_ctx->getContext(ev);
     ctx.scheduler = Scheduler::GetThis();
     if(cb){

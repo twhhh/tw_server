@@ -81,13 +81,13 @@ FdCtx::ptr FdManager::get(int fd, bool auto_create){
         }
     }
     lock.unlock();
-
-    MutexType::WriteLock lock2(m_mutex);
     FdCtx::ptr ctx(new FdCtx(fd));
+    MutexType::WriteLock lock2(m_mutex);
     if(fd >= (int)m_fds.size()) {
         m_fds.resize(fd * 1.5);
     }
     m_fds[fd] = ctx;
+    lock2.unlock();
     return ctx;
 }
 void FdManager::del(int fd){

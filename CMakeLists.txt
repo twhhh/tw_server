@@ -28,6 +28,8 @@ tw/hook.cc
 tw/address.cc
 tw/socket.cc
 tw/bytearray.cc
+tw/tcp_server.cc
+tw/http/http.cc
 )
 
 
@@ -54,3 +56,9 @@ target_link_libraries(test_socket ${LIBS})
 
 add_executable(test_bytearray ${SRC} test_bytearray.cc)
 target_link_libraries(test_bytearray ${LIBS})
+
+add_executable(echo_server ${SRC} example/echo_server.cc)
+target_link_libraries(echo_server ${LIBS})
+
+add_executable(test_http ${SRC} test_http.cc)
+target_link_libraries(test_http ${LIBS})

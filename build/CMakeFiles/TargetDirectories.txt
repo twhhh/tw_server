@@ -1,4 +1,12 @@
-/root/workspace/tw_server/build/CMakeFiles/edit_cache.dir
-/root/workspace/tw_server/build/CMakeFiles/test.dir
+/root/workspace/tw_server/build/CMakeFiles/test_hook.dir
+/root/workspace/tw_server/build/CMakeFiles/test_iomanager.dir
+/root/workspace/tw_server/build/CMakeFiles/test_address.dir
+/root/workspace/tw_server/build/CMakeFiles/test_bytearray.dir
+/root/workspace/tw_server/build/CMakeFiles/test_scheduler.dir
 /root/workspace/tw_server/build/CMakeFiles/rebuild_cache.dir
 /root/workspace/tw_server/build/CMakeFiles/test_thread.dir
+/root/workspace/tw_server/build/CMakeFiles/test_socket.dir
+/root/workspace/tw_server/build/CMakeFiles/test.dir
+/root/workspace/tw_server/build/CMakeFiles/test_http.dir
+/root/workspace/tw_server/build/CMakeFiles/echo_server.dir
+/root/workspace/tw_server/build/CMakeFiles/edit_cache.dir

@@ -13,6 +13,7 @@ public:
         HOLD,
         EXEC,
         TERM,
+        READY,
         EXECEPT
     };
 private:
@@ -22,6 +23,7 @@ public:
     ~Fiber();
     uint64_t getFiberID() const {return m_fiberID;}
     State getState() const {return m_state;}
+    void setState(Fiber::State state) {m_state = state;}
     void swapIn();
     void swapOut();
     void call();

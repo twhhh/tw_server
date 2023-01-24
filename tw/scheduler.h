@@ -65,7 +65,9 @@ private:
         Fiber::ptr fiber = nullptr;
         std::function<void()> cb = nullptr;
         FiberAndFunc(Fiber::ptr f):fiber(f){}
+        FiberAndFunc(Fiber::ptr *f){fiber.swap(*f);}
         FiberAndFunc(std::function<void()> c):cb(c){}
+        FiberAndFunc(std::function<void()> *c){cb.swap(*c);}
         FiberAndFunc(){}
         void reset(){
             fiber = nullptr;

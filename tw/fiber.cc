@@ -88,7 +88,7 @@ namespace tw{
         if(t_fiber){
             return t_fiber->shared_from_this();
         }
-        Fiber::ptr main_fiber(new Fiber());
+        Fiber::ptr main_fiber(new Fiber);
         TW_ASSERT(t_fiber == main_fiber.get());
         t_main_fiber = main_fiber;
         return t_fiber->shared_from_this();
@@ -175,6 +175,7 @@ namespace tw{
     void Fiber::YieldToHold(){
         Fiber::ptr cur = GetThis();
         TW_ASSERT(cur->getState() == Fiber::EXEC);
+        //cur->m_state = Fiber::HOLD;
         cur->swapOut();
     }
 }
