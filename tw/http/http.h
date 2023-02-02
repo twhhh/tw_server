@@ -135,6 +135,36 @@ struct CaseInsensitiveless{
     bool operator()(const std::string& lhs, const std::string& rhs) const; 
 };
 
+template<class MapType, class T>
+bool checkGetAs(const MapType& m, const std::string& key, 
+    T& val, const T& def = T()){
+    auto it = m.find(key);
+    if(it == m.end()){
+        val = def;
+        return false;
+    }
+    try{
+        val = boost::lexical_cast<T>(it->second);
+        return true;
+    } catch(...){
+        val = def;
+    }
+    return false;
+}
+
+template<class MapType, class T>
+T getAs(const MapType& m, const std::string& key, const T& def = T()){
+    auto it = m.find(key);
+    if(it == m.end()){
+        return def;
+    }
+    try{
+        return boost::lexical_cast<T>(it->second);
+    } catch(...){
+        
+    }
+    return def;
+}
 class HttpRequest{
 public:
     using ptr = std::shared_ptr<HttpRequest>;
@@ -178,6 +208,15 @@ public:
     bool hasParam(const std::string& key, std::string* val = nullptr);
     bool hasCookie(const std::string& key, std::string* val = nullptr);
 
+    template<class T>
+    bool checkGetHeaderAs(const std::string& key, T& val, const T& def = T()){
+        return checkGetAs(m_headers, key, val, def);
+    }
+
+    template<class T>
+    T getHeaderAs(const std::string& key, const T& def = T()){
+        return getAs(m_headers, key, def);
+    }
     std::ostream& dump(std::ostream& os) const;
     std::string toString() const;
 private:
@@ -216,6 +255,15 @@ public:
     void setHeader(const std::string& key, const std::string& val);
     void delHeader(const std::string& key);
 
+    template<class T>
+    bool checkGetHeaderAs(const std::string& key, T& val, const T& def = T()){
+        return checkGetAs(m_headers, key, val, def);
+    }
+
+    template<class T>
+    T getHeaderAs(const std::string& key, const T& def = T()){
+        return getAs(m_headers, key, def);
+    }
     std::ostream& dump(std::ostream& os) const;
     std::string toString() const;
 private:

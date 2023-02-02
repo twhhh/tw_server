@@ -29,7 +29,14 @@ tw/address.cc
 tw/socket.cc
 tw/bytearray.cc
 tw/tcp_server.cc
+tw/stream.cc
+tw/socket_stream.cc
 tw/http/http.cc
+tw/http/httpclient_parser.rl.cc
+tw/http/http11_parser.rl.cc
+tw/http/http_parser.cc
+tw/http/http_session.cc
+tw/http/http_server.cc
 )
 
 
@@ -62,3 +69,9 @@ target_link_libraries(echo_server ${LIBS})
 
 add_executable(test_http ${SRC} test_http.cc)
 target_link_libraries(test_http ${LIBS})
+
+add_executable(test_http_parser ${SRC} test_http_parser.cc)
+target_link_libraries(test_http_parser ${LIBS})
+
+add_executable(test_http_server ${SRC} test_http_server.cc)
+target_link_libraries(test_http_server ${LIBS})
