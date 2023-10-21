@@ -1,6 +1,7 @@
 #include <iostream>
 #include <unordered_map>
 #include <functional>
+#include <chrono>
 #include "log.h"
 namespace tw{
 const char* LogLevel::LevelToString(Level level){
@@ -48,7 +49,11 @@ LogEvent::LogEvent(const char* file, uint32_t line, uint32_t elapse
             ,m_fiberID(fiberID)
             ,m_time(time)
             ,m_level(level)
-            ,m_logger(logger){}
+            ,m_logger(logger){
+    auto now = std::chrono::high_resolution_clock::now();
+    auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+    m_elapse = timestamp;
+}
 
 LogEventWrap::LogEventWrap(LogEvent::ptr event){
     m_event = event;
@@ -65,7 +70,7 @@ void StdoutLogAppender::log(std::shared_ptr<Logger> logger, LogEvent::ptr event)
     char buf[64];
     strftime(buf, sizeof(buf), fo.c_str(), &tm);
     std::lock_guard<std::mutex> lk(m_mutex);
-    std::cout << "[" << std::string(buf) << "]" << " " 
+    std::cout << "[" << std::string(buf) << " " << event->getElapse() << "]" << " " 
         << event->getThreadID() << " "
         << event->getFiberID() << " "
         << "["<< LogLevel::LevelToString(event->getLevel()) << "]"

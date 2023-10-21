@@ -145,7 +145,7 @@ unsigned int sleep(unsigned int seconds){
 
 int usleep(useconds_t usec){
     if(!tw::is_hook_enable()){
-        return sleep_f(usec);
+        return usleep_f(usec);
     }
     tw::Fiber::ptr fiber =  tw::Fiber::GetThis();
     tw::IOManager* iom = tw::IOManager::GetThis();

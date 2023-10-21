@@ -13,7 +13,7 @@
 #define TW_LOG_LEVEL(logger, level)\
     if(logger->getLevel() <= level)\
         tw::LogEventWrap(tw::LogEvent::ptr(new tw::LogEvent(__FILE__, __LINE__,\
-        time(0), tw::GetThreadID(), tw::GetFiberID(), time(0), level, logger))).getSS()
+        0, tw::GetThreadID(), tw::GetFiberID(), time(0), level, logger))).getSS()
 
 #define TW_LOG_DEBUG(logger)\
     TW_LOG_LEVEL(logger, tw::LogLevel::DEBUG)
